@@ -1,0 +1,44 @@
+/* Desktop presentation only: existing actions and persistent library remain authoritative. */
+(()=>{
+const icon=name=>{const node=document.createElementNS('http://www.w3.org/2000/svg','svg');node.classList.add('lucide');node.setAttribute('aria-hidden','true');const use=document.createElementNS(node.namespaceURI,'use');use.setAttribute('href','/icons.svg#'+name);node.append(use);return node};
+const button=(label,name,action)=>{const node=element('button');node.type='button';node.className='icon-button';node.append(icon(name),document.createTextNode(label));node.onclick=action;return node};
+if(window.desktop)document.body.classList.add('desktop-native');
+const brand=document.querySelector('.brand');brand.replaceChildren();const mark=element('div',undefined,'brand-mark');mark.append(icon('audio-lines'));brand.append(mark,document.createTextNode('声笺'),element('span','Music Manager'));
+const caption=element('span','音乐资料库','window-caption');document.querySelector('.topbar').insertBefore(caption,document.querySelector('.top-actions'));
+$('settingsToggle').replaceChildren(icon('settings-2'),document.createTextNode(' 设置'));$('settingsToggle').title='目录与设置 · Ctrl+,';
+const sidebar=element('aside',undefined,'app-sidebar');sidebar.setAttribute('aria-label','工作区导航');document.body.insertBefore(sidebar,document.querySelector('main'));
+const views=[
+ {group:'资料库',filter:'all',label:'全部音乐',icon:'library',description:'整理本地音乐，核对每一份最终输出。',match:()=>true},
+ {filter:'differences',label:'有差异',icon:'list-filter',description:'查看缺失或有差异的元信息，逐首完成核对。',match:t=>!!t.differences?.length},
+ {filter:'duplicates',label:'重复版本',icon:'copy',description:'对比同曲不同版本，决定保留哪些录音。',match:t=>!!t.duplicate},
+ {filter:'suitable',label:'可用替代',icon:'badge-check',description:'已找到可用候选，可试听、核对并选择最终信息。',match:t=>t.searchStatus==='suitable'},
+ {group:'人工审阅',filter:'review-needed',label:'待复核',icon:'scan-text',description:'集中核对识别异常和仍需人工判断的歌曲。',match:t=>!!t.reviewReasons?.length&&t.manualReview?.status!=='verified'},
+ {filter:'asr-error',label:'识别错误',icon:'circle-alert',description:'查看失败原因，修正后重新识别。',match:t=>t.asrStatus==='error'},
+ {filter:'export-excluded',label:'已排除',icon:'circle-minus',description:'这些歌曲不会导出，可随时恢复。',match:t=>!!t.exportExcluded}
+];
+const navigation=[];
+for(const view of views){if(view.group)sidebar.append(element('div',view.group,'sidebar-section'));const node=button(view.label,view.icon,()=>{if(topDialog())return;$('filter').value=view.filter;$('filter').dispatchEvent(new Event('change',{bubbles:true}));});node.classList.add('nav-item');const count=element('span','0','nav-count');node.append(count);node.dataset.view=view.filter;sidebar.append(node);navigation.push({view,node,count})}
+sidebar.append(element('div',undefined,'sidebar-divider'),element('div','工作台','sidebar-section'));
+sidebar.append(button('重复版本审阅','columns-2',()=>$('duplicateMode').click()),button('逐首人工核对','clipboard-check',()=>$('reviewMode').click()));
+for(const node of sidebar.querySelectorAll(':scope>button:not(.nav-item)'))node.classList.add('nav-item');
+const footer=element('div',undefined,'sidebar-footer'),local=element('div');local.append(element('span',undefined,'local-dot'),document.createTextNode('本地资料库'));const folder=element('span',undefined,'sidebar-folder');footer.append(local,element('strong','音频与识别留在本机'),folder,button('目录与模型设置','folder-cog',()=>openSettings()));sidebar.append(footer);
+const query=$('query'),search=element('div',undefined,'search-box');query.before(search);search.append(icon('search'),query,element('kbd','Ctrl F'));query.placeholder='搜索歌曲、歌手、专辑';
+const dock=element('section',undefined,'player-dock');dock.setAttribute('aria-label','试听播放器');const idle=element('div',undefined,'dock-idle'),idleText=element('div');idleText.append(element('strong','选择一首歌开始试听'),element('small','点击列表中的播放按钮，或在歌词中定位播放'));const idleControls=element('div',undefined,'idle-controls');idleControls.setAttribute('aria-hidden','true');for(const name of ['skip-back','circle-play','skip-forward'])idleControls.append(icon(name));idle.append(icon('disc-3'),idleText,idleControls);dock.append(idle,$('playerBar'));document.body.append(dock);
+const status=element('div',undefined,'statusbar');$('log').setAttribute('role','status');$('log').setAttribute('aria-live','polite');status.append(element('span',undefined,'status-dot'),$('log'),element('span','右键单首操作  ·  Ctrl F 搜索','status-hint'));document.body.append(status);
+const settings=$('settings'),backdrop=element('div');backdrop.id='settingsBackdrop';backdrop.hidden=settings.hidden;document.body.append(backdrop,settings);settings.classList.add('detail-popup');settings.setAttribute('role','dialog');settings.setAttribute('aria-modal','true');settings.setAttribute('aria-labelledby','settingsHeading');const settingsHead=element('div',undefined,'settings-head'),settingsTitle=element('h2','目录与设置');settingsTitle.id='settingsHeading';const close=button('','x',()=>closeSettings());close.setAttribute('aria-label','关闭设置');settingsHead.append(settingsTitle,close);settings.prepend(settingsHead);
+const openSettings=()=>{settings.hidden=false;backdrop.hidden=false;scheduleLayout();close.focus()};
+const closeSettings=()=>{settings.hidden=true;backdrop.hidden=true;scheduleLayout();afterDialogLayout(()=>$('settingsToggle').focus())};
+$('settingsToggle').onclick=()=>settings.hidden?openSettings():closeSettings();backdrop.onclick=closeSettings;
+// Candidate review is a bounded workspace: only lyrics scroll during comparison.
+const searchRegion=document.querySelector('[data-regions="search"]'),searchOptions=element('details',undefined,'search-options'),searchSummary=element('summary','搜索参数 · 修改歌名、歌手和平台');searchOptions.append(searchSummary,document.querySelector('.search-fields'),$('searchQuery').parentElement);searchRegion.prepend(searchOptions);
+const diagnostics=element('details',undefined,'search-diagnostics');diagnostics.append(element('summary','检索详情与使用说明'),$('executedQueries'),$('searchErrors'),searchRegion.lastElementChild);searchRegion.append(diagnostics);
+const settingsObserver=new MutationObserver(()=>{backdrop.hidden=settings.hidden;if(!settings.hidden&&topDialog()===settings)close.focus()});settingsObserver.observe(settings,{attributes:true,attributeFilter:['hidden']});
+for(const [id,name]of [['organize','wand-sparkles'],['export','folder-output'],['scan','folder-search'],['addOverrideField','plus']]){const node=$(id);node.classList.add('icon-button');node.prepend(icon(name))}
+const heading=document.querySelector('.heading h1'),description=document.querySelector('.heading p');
+function updateWorkspaceChrome(){const current=$('filter').value,view=views.find(view=>view.filter===current);for(const item of navigation){const active=item.view.filter===current;item.node.classList.toggle('active',active);if(active)item.node.setAttribute('aria-current','page');else item.node.removeAttribute('aria-current');item.count.textContent=tracks.filter(item.view.match).length}heading.textContent=view?.label||$('filter').selectedOptions[0]?.textContent||'全部音乐';description.textContent=view?.description||'使用筛选和搜索缩小范围，点击信息区域查看详情。';folder.textContent=$('input').value||'尚未选择音乐目录';folder.title=folder.textContent;const detailOpen=!!topDialog();sidebar.inert=detailOpen;dock.inert=!!topDialog()&&['settings','overridePanel'].includes(topDialog().id)}
+window.addEventListener('library-rendered',updateWorkspaceChrome);$('filter').addEventListener('change',updateWorkspaceChrome);$('input').addEventListener('change',updateWorkspaceChrome);
+const chromeObserver=new MutationObserver(updateWorkspaceChrome);for(const node of dialogIds.map($))chromeObserver.observe(node,{attributes:true,attributeFilter:['hidden']});updateWorkspaceChrome();
+document.addEventListener('keydown',event=>{if(event.defaultPrevented)return;const editing=event.target.closest?.('input,textarea,select,[contenteditable=true]');if((event.ctrlKey||event.metaKey)&&['f','k'].includes(event.key.toLowerCase())&&!topDialog()){event.preventDefault();query.focus();query.select()}else if((event.ctrlKey||event.metaKey)&&event.key===','&&!topDialog()){event.preventDefault();openSettings()}else if(event.key==='Escape'&&!settings.hidden&&topDialog()===settings){event.preventDefault();event.stopImmediatePropagation();closeSettings()}else if(event.key==='Escape'&&!topDialog()&&query.value&&!editing){query.value='';query.dispatchEvent(new Event('input',{bubbles:true}))}},true);
+// Inform users about completed actions without moving their viewport.
+const toast=element('div',undefined,'shell-toast');toast.setAttribute('role','status');document.body.append(toast);let toastTimer;const logObserver=new MutationObserver(()=>{const message=$('log').textContent;if(!/失败|已保存|导出完成|搜索完成|操作完成/.test(message))return;toast.textContent=message;clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.textContent='',5000)});logObserver.observe($('log'),{childList:true,characterData:true,subtree:true});
+})();

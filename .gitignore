@@ -1,4 +1,5 @@
 node_modules/
+/docs/screenshots/metadata-before-full.jpg
 /.env
 /.env.*
 !/.env.example
