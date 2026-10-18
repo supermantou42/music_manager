@@ -21,8 +21,13 @@ test('moved modules and entry points resolve within the reorganized repository',
 });
 
 test('HTTP entry serves frontend assets and package version after source relocation',async t=>{
+  const dir=await fs.mkdtemp(path.join(require('node:os').tmpdir(),'music-manager-http-test-'));
+  const runtime=require('../src/runtime-paths.cjs');
+  runtime.configure({packaged:true,userData:dir,resourcesPath:root});
+  t.after(async()=>{runtime.configure({});await fs.rm(dir,{recursive:true,force:true})});
+  await fs.writeFile(path.join(dir,'library.json'),JSON.stringify({tracks:[]}));
   const {start}=require('../src/server.cjs');
-  const before=await fs.readFile(path.join(root,'data/library.json')).catch(()=>null);
+  const before=await fs.readFile(path.join(dir,'library.json'));
   const server=await start();
   t.after(()=>new Promise(resolve=>{server.close(resolve);server.closeAllConnections()}));
   const base=`http://127.0.0.1:${server.address().port}`;
@@ -35,5 +40,5 @@ test('HTTP entry serves frontend assets and package version after source relocat
     assert.ok((await asset.text()).length>0,name);
   }
   assert.equal((await (await fetch(base+'/api/app-info')).json()).version,require('../package.json').version);
-  assert.deepEqual(await fs.readFile(path.join(root,'data/library.json')).catch(()=>null),before,'loading must preserve the existing library');
+  assert.deepEqual(await fs.readFile(path.join(dir,'library.json')),before,'loading must preserve the existing library');
 });

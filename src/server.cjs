@@ -17,7 +17,7 @@ const {saveBundle}=require('./asr-bundle.cjs');
 const {segmentAudio,roughLRC}=require('./acoustic.cjs');
 const {findMetadata,applyCandidate,registerCandidates,refreshCandidateComparisons,rerankStored}=require('./metadata.cjs');
 const {classifySearch,differences}=require('./overview.cjs');const {summary}=require('./library-state.cjs');const jobs=require('./jobs.cjs');
-const stateFile=path.join(__dirname,'..','data','library.json');
+const stateFile=require('./runtime-paths.cjs').data('library.json');
 async function persist(){await fs.mkdir(path.dirname(stateFile),{recursive:true});const temp=stateFile+'.'+crypto.randomUUID()+'.tmp';await fs.writeFile(temp,JSON.stringify({tracks}));await fs.rename(temp,stateFile)}
 const coverCache=new Map();
 async function thumbnail(t){if(coverCache.has(t.path))return coverCache.get(t.path);if(t.coverIndex===undefined){const {stdout}=await command('ffprobe',['-v','error','-show_streams','-of','json',t.path]);t.coverIndex=JSON.parse(stdout).streams?.find(s=>s.disposition?.attached_pic)?.index??null}if(t.coverIndex===null)throw Error('无内嵌封面');const {stdout}=await run('ffmpeg',['-v','error','-i',t.path,'-map',`0:${t.coverIndex}`,'-frames:v','1','-vf','scale=160:160:force_original_aspect_ratio=decrease','-f','image2pipe','-vcodec','mjpeg','pipe:1'],{windowsHide:true,encoding:'buffer',maxBuffer:4*1024*1024,timeout:15000});if(coverCache.size>=200)coverCache.delete(coverCache.keys().next().value);coverCache.set(t.path,stdout);return stdout}

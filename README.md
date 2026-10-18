@@ -2,7 +2,7 @@
 
 Windows 本地音乐库整理工具：扫描音乐与标签，使用本地 ASR 辅助核验歌词，搜索替代元信息，试听对比后整理导出。
 
-当前版本 **0.1.0**，处于原型验证阶段。基于 Electron，桌面试听使用 mpv，语音识别使用本地 Qwen3-ASR，在线搜索接入网易云音乐与 QQ 音乐。
+当前处于原型验证阶段，版本见 [Releases](https://github.com/supermantou42/music_manager/releases)。基于 Electron，桌面试听使用 mpv，语音识别使用本地 Qwen3-ASR，在线搜索接入网易云音乐与 QQ 音乐。
 
 ## 主要功能
 
@@ -78,6 +78,7 @@ test-fixtures/      本机测试产物（不入库）
 - [使用说明与匹配规则](docs/usage.md)
 - [ASR 模型、GPU 服务与并发](docs/asr.md)
 - [开发、测试与目录约定](docs/development.md)
+- [版本与发布](docs/releasing.md)
 - [元信息接口来源与实现](docs/metadata-integration.md)
 - [协作与提交准则](AGENTS.md)
 

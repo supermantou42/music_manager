@@ -6,19 +6,32 @@
   "scripts": {
     "start": "electron .",
     "dev": "node src/server.cjs",
-    "test": "node --test tests/*.cjs",
+    "test": "node --test --test-timeout=60000 tests/*.cjs",
     "verify:mpv": "node scripts/verify/verify-mpv.cjs",
     "build:icons": "node scripts/build-icons.cjs",
     "build:metadata": "powershell -NoProfile -ExecutionPolicy Bypass -File metadata-bridge/build.ps1",
     "install:mpv": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-mpv.ps1",
     "install:asr": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-asr-gpu.ps1",
-    "start:asr": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-asr.ps1"
+    "start:asr": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-asr.ps1",
+    "preversion": "npm test",
+    "release:check": "node scripts/check-release.cjs",
+    "dist:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-release.ps1 && electron-builder --config electron-builder.config.cjs --win --x64 --publish never",
+    "pack:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-release.ps1 && electron-builder --config electron-builder.config.cjs --win --x64 --dir --publish never",
+    "smoke:package": "node scripts/smoke-package.cjs"
   },
   "devDependencies": {
     "electron": "^44.7.0",
+    "electron-builder": "26.15.3",
     "jsdom": "29.1.1"
   },
   "dependencies": {
     "lucide": "1.59.0"
+  },
+  "description": "Local music metadata and lyrics manager",
+  "author": "supermantou42",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/supermantou42/music_manager.git"
   }
 }

@@ -11,7 +11,7 @@ D:\models\gguf\Qwen3-ASR-1.7B-Q8_0.gguf
 D:\models\gguf\mmproj-Qwen3-ASR-1.7B-Q8_0.gguf
 ```
 
-这是当前本机配置，其他机器需调整 `scripts/start-asr.ps1` 中的模型路径；桌面服务管理也使用同一组路径，见 `src/model-service.cjs`。
+桌面服务默认使用上述目录，可通过 `MUSIC_MODELS_DIR` 环境变量指定模型目录。独立启动脚本的模型路径位于 `scripts/start-asr.ps1`。安装版的数据和运行库位置见 [版本与发布](releasing.md)。
 
 GPU 安装脚本固定使用 llama.cpp b11552 CUDA 13.4 构建，并校验下载文件 SHA256：
 

@@ -20,3 +20,7 @@ metadata-bridge/*.exe
 
 # Rejected capture: contains another application
 /docs/screenshots/metadata-before-full.jpg
+
+# Local code signing credentials
+*.pfx
+*.p12

@@ -2,7 +2,7 @@ const {spawn}=require('child_process');
 const net=require('net'),path=require('path'),crypto=require('crypto');
 const {EventEmitter}=require('events');
 class MPVPlayer extends EventEmitter {
-  constructor(options={}){super();this.exe=options.exe||path.join(__dirname,'..','tools','mpv','mpv.exe');this.extra=options.extra||[];this.pending=new Map();this.sequence=0;this.state={position:0,duration:0,paused:true,volume:70,loaded:false,engine:'mpv'};this.segment=null;this.tail=Promise.resolve()}
+  constructor(options={}){super();this.exe=options.exe||require('./runtime-paths.cjs').tool('mpv','mpv.exe');this.extra=options.extra||[];this.pending=new Map();this.sequence=0;this.state={position:0,duration:0,paused:true,volume:70,loaded:false,engine:'mpv'};this.segment=null;this.tail=Promise.resolve()}
   publish(){this.emit('state',{...this.state})}
   status(){return this.run(async()=>{if(!this.socket||this.socket.destroyed)return {...this.state};const [paused,position,duration,idle]=await Promise.all(['pause','time-pos','duration','idle-active'].map(name=>this.command(['get_property',name]).catch(()=>undefined)));if(typeof paused==='boolean')this.state.paused=paused;if(Number.isFinite(position))this.state.position=Math.max(0,position-(this.segment?.start||0));if(Number.isFinite(duration))this.state.duration=this.segment?this.segment.end-this.segment.start:duration;if(idle===true)this.state.loaded=false;else if(idle===false&&Number.isFinite(position))this.state.loaded=true;this.publish();return {...this.state}})}
   async connect(){if(this.socket&&!this.socket.destroyed)return;if(this.connecting)return this.connecting;this.connecting=this.launch();try{await this.connecting}finally{this.connecting=null}}
