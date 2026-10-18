@@ -1,4 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {resolveExport,setCandidateMode}=require('./export-metadata.cjs');
+test('manual cover selection validates candidate membership and preserves other overrides',()=>{const {saveOverrides}=require('./export-metadata.cjs');const t=sample();t.metadataResult.candidates[1].cover='https://y.gtimg.cn/cover.jpg';saveOverrides(t,{artist:'Custom',cover:'https://y.gtimg.cn/cover.jpg'});assert.equal(resolveExport(t).track.cover,'https://y.gtimg.cn/cover.jpg');assert.equal(resolveExport(t).track.artist,'Custom');assert.throws(()=>saveOverrides(t,{cover:'http://localhost/private.jpg'}));saveOverrides(t,{cover:'none'});assert.equal(resolveExport(t).track.cover,'none');saveOverrides(t,{cover:'original'});assert.equal(t.manualOverrides.cover,'original')});
 test('original lyric fallback survives failed ASR, enforces strict duration and honors explicit choices',()=>{
  const {classifySearch}=require('./overview.cjs'),lyrics='[00:10.00]这是完全相同的歌词正文内容';
  const t={id:'fallback',duration:200,lyrics,status:'核验失败',asrStatus:'error',metadataResult:{candidates:[
