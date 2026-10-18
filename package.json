@@ -2,13 +2,17 @@
   "name": "music-manager-prototype",
   "version": "0.1.0",
   "private": true,
-  "main": "electron.cjs",
+  "main": "src/electron.cjs",
   "scripts": {
     "start": "electron .",
-    "dev": "node server.cjs",
-    "test": "node --test tests.cjs metadata-tests.cjs acoustic-tests.cjs overview-tests.cjs jobs-tests.cjs audio-tests.cjs language-lyrics-tests.cjs mpv-tests.cjs comparison-tests.cjs library-tests.cjs asr-state-tests.cjs scan-cache-tests.cjs concurrency-tests.cjs asr-request-tests.cjs review-workflow-tests.cjs comparison-player-tests.cjs waveform-tests.cjs workspace-state-tests.cjs export-metadata-tests.cjs desktop-ui-tests.cjs development-tools-tests.cjs",
-    "verify:mpv": "node verify-mpv.cjs",
-    "build:icons": "node build-icons.cjs"
+    "dev": "node src/server.cjs",
+    "test": "node --test tests/*.cjs",
+    "verify:mpv": "node scripts/verify/verify-mpv.cjs",
+    "build:icons": "node scripts/build-icons.cjs",
+    "build:metadata": "powershell -NoProfile -ExecutionPolicy Bypass -File metadata-bridge/build.ps1",
+    "install:mpv": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-mpv.ps1",
+    "install:asr": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-asr-gpu.ps1",
+    "start:asr": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-asr.ps1"
   },
   "devDependencies": {
     "electron": "^44.7.0",

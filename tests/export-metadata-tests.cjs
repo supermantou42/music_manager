@@ -1,0 +1,23 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {resolveExport,setCandidateMode}=require('../src/export-metadata.cjs');
+test('manual cover selection validates candidate membership and preserves other overrides',()=>{const {saveOverrides}=require('../src/export-metadata.cjs');const t=sample();t.metadataResult.candidates[1].cover='https://y.gtimg.cn/cover.jpg';saveOverrides(t,{artist:'Custom',cover:'https://y.gtimg.cn/cover.jpg'});assert.equal(resolveExport(t).track.cover,'https://y.gtimg.cn/cover.jpg');assert.equal(resolveExport(t).track.artist,'Custom');assert.throws(()=>saveOverrides(t,{cover:'http://localhost/private.jpg'}));saveOverrides(t,{cover:'none'});assert.equal(resolveExport(t).track.cover,'none');saveOverrides(t,{cover:'original'});assert.equal(t.manualOverrides.cover,'original')});
+test('original lyric fallback survives failed ASR, enforces strict duration and honors explicit choices',()=>{
+ const {classifySearch}=require('../src/overview.cjs'),lyrics='[00:10.00]这是完全相同的歌词正文内容';
+ const t={id:'fallback',duration:200,lyrics,status:'核验失败',asrStatus:'error',metadataResult:{candidates:[
+ {id:'wrong',source:'qq',duration:200,score:.99,lyrics:'这是完全不同的歌词正文内容'},
+ {id:'boundary',source:'qq',duration:201,score:.98,lyrics},
+ {id:'low',source:'qq',duration:200.2,score:.7,lyrics},
+ {id:'best',source:'qq',duration:200.9,score:.8,lyrics:'[00:20.00]这是完全相同的歌词正文内容！'}]}};
+ t.metadataResult=classifySearch(t,t.metadataResult);
+ assert.equal(t.metadataResult.recommendedId,'qq:best');assert.equal(t.metadataResult.searchStatus,'suitable');
+ assert.equal(t.metadataResult.candidates[0].assessment.fallback,true);assert.equal(resolveExport(t).candidate.id,'best');
+ t.metadataMatch={id:'wrong',source:'qq'};assert.equal(resolveExport(t).candidate.id,'wrong');
+ t.candidateExportMode='original';assert.equal(resolveExport(t).origin,'original');
+ const {matchesOriginal}=require('../src/fallback-match.cjs');assert.equal(matchesOriginal(t,{duration:201,lyrics}),false);assert.equal(matchesOriginal(t,{duration:0,lyrics}),false);assert.equal(matchesOriginal({...t,lyrics:''},{duration:200,lyrics:''}),false);
+ t.originalMetadata={lyrics:'最初文件的另一段歌词正文'};assert.equal(matchesOriginal(t,{duration:200,lyrics}),false);
+});
+const original={title:'原歌名',artist:'原歌手',album:'原专辑',lyrics:'这是原始歌词正文内容'};function sample(){return {id:'a',...original,path:'D:/Music/a.mp3',metadataResult:{candidates:[{id:'empty',source:'qq',score:1,title:'空',lyrics:''},{id:'best',source:'qq',score:.9,title:'建议歌名',artist:'建议歌手',album:'建议专辑',lyrics:'这是一段建议候选歌词正文'},{id:'manual',source:'qq',score:.8,title:'手动歌名',lyrics:'这是一段手工选择歌词正文'}]}}}
+test('export defaults to highest valid lyrics, preserves input, and respects explicit original or manual choice',()=>{const t=sample();assert.equal(resolveExport(t).track.title,'建议歌名');assert.equal(t.title,'原歌名');t.metadataMatch={id:'manual',source:'qq'};assert.equal(resolveExport(t).track.title,'手动歌名');t.originalMetadata=original;t.title='已采纳歌名';setCandidateMode([t],['a'],'original');assert.equal(resolveExport(t).track.title,'原歌名');assert.equal(t.title,'已采纳歌名');setCandidateMode([t],['a'],'suggested');assert.equal(resolveExport(t).track.title,'手动歌名')});
+test('missing candidates preserve original data and invalid export modes are rejected',()=>{const t=sample();t.metadataResult.candidates=[];assert.equal(resolveExport(t).origin,'original');assert.throws(()=>setCandidateMode([t],['a'],'bad'));assert.throws(()=>setCandidateMode([t],['missing'],'original'))});
+
+test('manual overrides are the final layer across candidate changes and original mode, including explicit empty values',()=>{const {saveOverrides}=require('../src/export-metadata.cjs'),t=sample();saveOverrides(t,{title:'最终手写歌名',lyrics:'',composer:'作曲者'});let out=resolveExport(t);assert.equal(out.track.title,'最终手写歌名');assert.equal(out.track.lyrics,'');assert.equal(out.overrides.composer,'作曲者');t.metadataMatch={id:'manual',source:'qq'};assert.equal(resolveExport(t).track.title,'最终手写歌名');setCandidateMode([t],['a'],'original');assert.equal(resolveExport(t).track.title,'最终手写歌名');assert.equal(t.title,'原歌名');saveOverrides(t,{});assert.equal(resolveExport(t).track.title,'原歌名')});
+test('override validation canonicalizes tag names and blocks operational or technical fields',()=>{const {validateOverrides}=require('../src/export-metadata.cjs');assert.deepEqual(validateOverrides({TITLE:'custom',albumArtist:'artist'}),{title:'custom',album_artist:'artist'});assert.throws(()=>validateOverrides({path:'elsewhere'}));assert.throws(()=>validateOverrides({bitrate:'320000'}));assert.throws(()=>validateOverrides({title:'one',TITLE:'two'}));assert.throws(()=>validateOverrides({genre:123}))});

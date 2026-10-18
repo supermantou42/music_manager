@@ -1,0 +1,4 @@
+// Verification and build scripts keep their working directory at the project root.
+process.chdir(require('path').resolve(__dirname,'..','..'));
+const assert=require('node:assert/strict');
+(async()=>{const server=await require('../../src/server.cjs').start();try{const base='http://127.0.0.1:'+server.address().port;const html=await(await fetch(base)).text();const token=html.match(/name="app-token" content="([^"]+)"/)[1];const response=await fetch(base+'/api/load-validation',{method:'POST',headers:{'X-App-Token':token,'Content-Type':'application/json'},body:'{}'});const result=await response.json();assert.ok(response.ok,JSON.stringify(result));assert.equal(result.tracks.length,10);assert.equal(result.summary.completed,10);console.log('Saved sample load passed:',result.tracks.length,JSON.stringify(result.summary.counts));}finally{server.close()}})().catch(error=>{console.error(error);process.exitCode=1});

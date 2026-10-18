@@ -1,29 +1,22 @@
+# Local dependencies and external runtimes
 node_modules/
-/docs/screenshots/metadata-before-full.jpg
+/tools/
+
+# Local state, reports, fixtures and build outputs
+/data/
+/validation/
+/test-fixtures/
+/dist/
+/out/
+metadata-bridge/*.exe
+*.log
+*.dmp
+*.gguf
+
+# Local credentials
 /.env
 /.env.*
 !/.env.example
-/data/
-/validation/
-/dist/
-/out/
-*.gguf
-*.dmp
-tools/
-test-fixtures/
-*.log
-metadata-bridge/*.exe
-data/asr/
-data/library.json*
-data/audio-preview/
-data/before-search-upgrade.json
-data/library-before-full.json
-data/full-scan-report.json
 
-data/settings.json*
-data/gpu-verification/
-
-data/model-service/
-
-data/workspace-state.json*
-data/waveform-cache/
+# Rejected capture: contains another application
+/docs/screenshots/metadata-before-full.jpg
