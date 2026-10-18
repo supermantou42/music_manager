@@ -1,0 +1,3 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {parseRange}=require('./audio-preview.cjs');
+test('audio seeking supports bounded, open and suffix ranges',()=>{assert.deepEqual(parseRange('bytes=10-19',100),{start:10,end:19});assert.deepEqual(parseRange('bytes=50-',100),{start:50,end:99});assert.deepEqual(parseRange('bytes=-20',100),{start:80,end:99});assert.deepEqual(parseRange('bytes=90-200',100),{start:90,end:99});assert.equal(parseRange(undefined,100),null)});
+test('invalid or unsatisfiable audio ranges are rejected',()=>{for(const value of ['bytes=100-','bytes=20-10','bytes=-0','bytes=','bytes=0-1,3-4'])assert.throws(()=>parseRange(value,100))});

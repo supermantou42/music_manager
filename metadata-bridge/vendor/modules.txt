@@ -1,0 +1,8 @@
+# github.com/guohuiyuan/music-lib v1.1.1-0.20260916154859-28e1080ba416
+## explicit; go 1.18
+github.com/guohuiyuan/music-lib/lyrics
+github.com/guohuiyuan/music-lib/model
+github.com/guohuiyuan/music-lib/netease
+github.com/guohuiyuan/music-lib/qq
+github.com/guohuiyuan/music-lib/utils
+# golang.org/x/text => golang.org/x/text v0.14.0

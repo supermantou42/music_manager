@@ -1,0 +1,1 @@
+const {parentPort}=require('worker_threads');const {gzipSync}=require('zlib');const {envelope}=require('./waveform.cjs');parentPort.once('message',({buffer,bins})=>{try{const data=envelope(Buffer.from(buffer),8000,bins),compressed=gzipSync(JSON.stringify(data));parentPort.postMessage({data,compressed})}catch(e){parentPort.postMessage({error:e.message})}});

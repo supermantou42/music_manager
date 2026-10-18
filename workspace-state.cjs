@@ -1,0 +1,4 @@
+const fs=require('fs/promises'),path=require('path'),crypto=require('crypto');
+function validate(value){if(!value||typeof value!=='object'||Array.isArray(value)||value.version!==1||JSON.stringify(value).length>200000)throw Error('无效的界面状态');return value}
+function createStore(file){let pending=Promise.resolve();async function read(){try{return validate(JSON.parse(await fs.readFile(file,'utf8')))}catch{return null}}function save(value){validate(value);const content=JSON.stringify(value);const operation=pending.catch(()=>{}).then(async()=>{await fs.mkdir(path.dirname(file),{recursive:true});const temp=file+'.'+crypto.randomUUID()+'.tmp';await fs.writeFile(temp,content);await fs.rename(temp,file)});pending=operation;return operation}return {read,save}}
+module.exports={...createStore(path.join(__dirname,'data','workspace-state.json')),validate,createStore};

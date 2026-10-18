@@ -1,0 +1,8 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {classifySearch,differences}=require('./overview.cjs');
+const t={artist:'原唱',album:'原专辑',lyrics:'这是一段真实的歌词正文'};
+const good={id:'1',source:'qq',lyrics:t.lyrics,components:{title:1,artist:1,durationDifferenceSeconds:1,versionMismatch:false}};
+test('search distinguishes empty, failed, unsuitable and suitable',()=>{assert.equal(classifySearch(t,{candidates:[],errors:[]}).searchStatus,'not-found');assert.equal(classifySearch(t,{candidates:[],errors:[{phase:'search'}]}).searchStatus,'failed');assert.equal(classifySearch(t,{candidates:[{...good,components:{...good.components,artist:0}}]}).searchStatus,'unsuitable');assert.equal(classifySearch(t,{candidates:[good],errors:[{phase:'lyrics'}]}).searchStatus,'suitable')});
+test('same lyrics on cover cannot qualify replacement',()=>{const r=classifySearch(t,{candidates:[{...good,components:{...good.components,artist:0}}]});assert.ok(r.candidates[0].assessment.reasons.includes('歌手不匹配'))});
+test('missing lyrics and verification mismatch are surfaced',()=>{assert.ok(differences({...t,lyrics:'',status:'需要复核'}).includes('歌词不一致'));assert.ok(differences({...t,lyrics:''}).includes('缺少歌词正文'))});
+
+test('highest score is recommended even with artist warnings while assessment remains visible',()=>{const r=classifySearch(t,{candidates:[{...good,id:'low',score:.85},{...good,id:'high',score:.86,components:{...good.components,artist:0}}]});assert.equal(r.recommendedId,'qq:high');assert.equal(r.candidates[0].id,'high');assert.equal(r.candidates[0].assessment.suitable,false);assert(r.candidates[0].assessment.reasons.includes('歌手不匹配'));assert.equal(r.searchStatus,'suitable')});

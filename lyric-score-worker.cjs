@@ -1,0 +1,1 @@
+const {parentPort}=require('worker_threads'),{compare}=require('./core.cjs');parentPort.once('message',t=>{try{parentPort.postMessage({track:compare(t.lyrics,t.transcript,t.segments),candidates:t.candidates.map(c=>({id:c.id,source:c.source,result:compare(c.lyrics,t.transcript,t.segments)}))})}catch(e){parentPort.postMessage({error:e.message})}});

@@ -1,0 +1,2 @@
+function reuseTrack(fresh,prior){if(!prior)return fresh;const unchanged=prior.fileSignature?prior.fileSignature.size===fresh.fileSignature.size&&prior.fileSignature.mtimeMs===fresh.fileSignature.mtimeMs:Math.abs(prior.duration-fresh.duration)<.1&&((prior.originalMetadata||prior).title===fresh.title)&&((prior.originalMetadata||prior).artist===fresh.artist);return unchanged?{...fresh,...prior,path:fresh.path,fileSignature:fresh.fileSignature,audioInfo:fresh.audioInfo,coverIndex:fresh.coverIndex}:fresh}
+module.exports={reuseTrack};

@@ -1,0 +1,9 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const {clean,compare,relative}=require('./core.cjs');
+test('Windows filename sanitization',()=>{assert.equal(clean('CON'),'_CON');assert.equal(clean('a/b:*'),'a_b__')});
+test('LRC text comparison ignores timestamps and punctuation',()=>{assert.equal(compare('[00:01.00]Hello, beautiful world!','hello beautiful world').status,'基本一致');assert.equal(compare('','hello world').status,'无法判断');assert.equal(compare('完全不同的歌词内容','这是另外一段文字内容').status,'需要复核')});
+test('output path retains original format',()=>{assert.ok(relative({artist:'A',album:'B',title:'C',path:'song.FLAC'}).endsWith('C.flac'))});
+test('credits-only LRC cannot establish lyric mismatch',()=>{assert.equal(compare('\uFEFF[00:00.00-1] 作曲 : Dau Ngoc Luong','这是一首歌曲的实际歌词内容').status,'无法判断');assert.equal(compare('[00:00.00] 作词 : 某某\n[00:10.00]我爱这片美丽的天空','我爱这片美丽的天空').status,'基本一致')});
+test('word-timed credits are ignored',()=>{assert.equal(compare('[00:01]作[00:02]曲[00:03]:姓名\n[00:05]我爱这片美丽的天空','我爱这片美丽的天空').status,'基本一致')});
+
+test('comparison ignores credits and starts at the first usable ASR segment with margin',()=>{const {compare}=require('./core.cjs');const lyrics='[00:00.00]作词 张三\n[00:01.00]制作人：李四\n[00:02.00]这是不应参与比较的开头\n[00:20.00]明月几时有把酒问青天';const r=compare(lyrics,'明月几时有把酒问青天',[{start:0,text:'',silent:true},{start:21,text:'明月几时有把酒问青天',state:'completed'}]);assert.equal(r.score,1);assert.equal(r.comparisonScope.startSeconds,19);assert.equal(r.comparisonScope.removedLeadingLines,1)});
+test('untimed lyrics preserve full content and timeline mismatches do not silently discard all lines',()=>{const {compare}=require('./core.cjs');const text='明月几时有把酒问青天';assert.equal(compare('作曲：张三\n'+text,text,[{start:30,text}]).score,1);assert.equal(compare('[00:01.00]'+text,text,[{start:30,text}]).comparisonScope.mode,'full')});

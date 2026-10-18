@@ -1,0 +1,2 @@
+function createLimiter(limit){let active=0;const queue=[];function pump(){while(active<limit&&queue.length){const {run,resolve,reject}=queue.shift();active++;Promise.resolve().then(run).then(resolve,reject).finally(()=>{active--;pump()})}}return {run:run=>new Promise((resolve,reject)=>{queue.push({run,resolve,reject});pump()}),setLimit:value=>{if(!Number.isInteger(value)||value<1)throw Error('无效并行度');limit=value;pump()},snapshot:()=>({limit,active,queued:queue.length})}}
+module.exports={createLimiter};
