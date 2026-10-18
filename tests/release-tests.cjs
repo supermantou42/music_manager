@@ -1,5 +1,17 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
 const {checkRelease}=require('../scripts/check-release.cjs');
+test('clean builders can download Electron while local builds reuse an installed runtime',async()=>{
+  const file=path.resolve(__dirname,'../electron-builder.config.cjs');
+  const source=await fs.readFile(file,'utf8');
+  function load(exists){
+    const module={exports:{}};
+    const localRequire=name=>name==='node:fs'?{existsSync:()=>exists}:require(name);
+    new Function('require','module','__dirname',source)(localRequire,module,path.dirname(file));
+    return module.exports;
+  }
+  assert.equal(load(false).electronDist,undefined);
+  assert.equal(load(true).electronDist,path.resolve(__dirname,'../node_modules/electron/dist'));
+});
 test('release tags must match package and lockfile versions',async t=>{
   const root=await fs.mkdtemp(path.join(os.tmpdir(),'music-manager-version-'));
   t.after(()=>fs.rm(root,{recursive:true,force:true}));

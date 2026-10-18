@@ -1,9 +1,11 @@
+const path=require('node:path'),fs=require('node:fs');
+const localElectron=path.join(__dirname,'node_modules','electron','dist');
 module.exports={
   appId:'io.github.supermantou42.musicmanager',
   productName:'MusicManager',
   executableName:'MusicManager',
   asar:true,
-  electronDist:'node_modules/electron/dist',
+  electronDist:fs.existsSync(localElectron)?localElectron:undefined,
   directories:{output:'dist'},
   files:['src/**','ui/**','package.json','LICENSE','THIRD_PARTY_NOTICES.md','!node_modules/**'],
   extraResources:[
