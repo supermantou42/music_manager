@@ -36,3 +36,34 @@ test('failed candidate lyrics retry individually without changing gallery page',
  w.retryFixture=full;w.eval("selectedId='retry-test';selected=retryFixture;candidateIndex=2;detailRegion='search';renderCandidates(selected)");
  const retry=d.querySelector('[data-retry-lyrics="qq:2"]');assert(retry);retry.click();assert.equal(retry.disabled,true);await wait();await wait();assert.equal(calls,1);assert.equal(w.eval('candidateIndex'),2);assert.match(d.getElementById('candidate').textContent,/newly recovered lyrics/);assert(d.querySelector('[data-retry-lyrics="qq:3"]'));assert.equal(d.querySelector('[data-retry-lyrics="qq:2"]'),null);
 });
+
+test('final output overrides activate on editing and Enter saves without checkboxes',async t=>{
+ const {w,d,requests}=await workspace(t);await w.eval("openOverrides('0')");await wait();
+ const input=d.querySelector('#overrideFields input[aria-label="歌手"]'),row=input.closest('.override-row'),original=input.value;assert.equal(input.disabled,false);assert.equal(row.querySelector('input[type=checkbox]').hidden,true);
+ input.value='Edited Singer';input.dispatchEvent(new w.Event('input'));assert(row.classList.contains('override-changed'));input.value=original;input.dispatchEvent(new w.Event('input'));assert(!row.classList.contains('override-changed'));
+ input.value='Edited Singer';input.dispatchEvent(new w.Event('input'));input.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true,cancelable:true}));assert.equal(requests.filter(r=>r.url==='/api/manual-overrides').length,0);
+ const lyric=d.querySelector('#overrideFields textarea');const newline=new w.KeyboardEvent('keydown',{key:'Enter',shiftKey:true,bubbles:true,cancelable:true});lyric.dispatchEvent(newline);assert.equal(newline.defaultPrevented,false);
+ input.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));await wait();const writes=requests.filter(r=>r.url==='/api/manual-overrides');assert.equal(writes.length,1);const body=JSON.parse(writes[0].options.body);assert.equal(body.overrides.artist,'Edited Singer');assert.equal(Object.hasOwn(body.overrides,'title'),false);
+});
+
+test('opening and closing final override dialog preserves library scroll and never scrolls on focus',async t=>{
+ const {w,d}=await workspace(t),calls=[],focus=w.HTMLElement.prototype.focus;
+ w.HTMLElement.prototype.focus=function(options){calls.push(options);return focus.call(this,options)};
+ const viewport=d.getElementById('listViewport');viewport.scrollTop=1200;
+ await w.eval("openOverrides('0')");await wait();assert.equal(viewport.scrollTop,1200);assert(calls.length);assert(calls.every(options=>options?.preventScroll===true));
+ d.getElementById('closeOverrides').click();await wait();await wait();assert.equal(viewport.scrollTop,1200);assert(calls.every(options=>options?.preventScroll===true));
+});
+
+test('virtual scrolling keeps cached rows attached until replacement and avoids redundant scroll writes',async t=>{
+ const {w,d}=await workspace(t),viewport=d.getElementById('listViewport');let position=1800,writes=0;
+ Object.defineProperty(viewport,'scrollTop',{configurable:true,get:()=>position,set:value=>{writes++;position=value}});
+ const rows=d.getElementById('rows'),replace=rows.replaceChildren.bind(rows);rows.replaceChildren=(...nodes)=>{assert(nodes.length>2);const reused=nodes.filter(n=>n.parentNode===rows);assert(reused.length>0);replace(...nodes)};
+ w.eval('renderRows()');assert.equal(position,1800);assert.equal(writes,0);
+ position=2200;viewport.dispatchEvent(new w.Event('scroll'));await wait();assert.equal(position,2200);assert.equal(writes,0);
+});
+
+test('advanced final output overrides combine field labels and offer deduplicated search choices',async t=>{
+ const {w,d,items,requests}=await workspace(t);items[0].metadataResult={candidates:[{id:'a',source:'qq',title:'Choice',artist:'New Artist',album:'Album',lyrics:'[00:01]candidate lyric text'},{id:'b',source:'netease',title:'Choice',artist:'New Artist',album:'Album',lyrics:'[00:01]candidate lyric text'}]};await w.eval("openOverrides('0')");await wait();
+ const input=d.querySelector('#overrideFields input[aria-label="歌手"]'),row=input.closest('.override-row');assert.equal(row.querySelector('[aria-label="覆盖字段名"]').hidden,true);assert.match(row.querySelector('label').textContent,/歌手artist/);const choices=row.querySelector('select');assert.equal(choices.options.length,2);assert.match(choices.options[1].textContent,/qq.*netease/);choices.value='0';choices.dispatchEvent(new w.Event('change'));assert.equal(input.value,'New Artist');assert(row.classList.contains('override-changed'));
+ const lyrics=d.querySelector('#overrideFields textarea').closest('.override-row').querySelector('select');assert(lyrics);lyrics.value='0';lyrics.dispatchEvent(new w.Event('change'));d.getElementById('saveOverrides').click();await wait();const body=JSON.parse(requests.find(r=>r.url==='/api/manual-overrides').options.body);assert.equal(body.overrides.artist,'New Artist');assert.equal(body.overrides.lyrics,'[00:01]candidate lyric text');assert.equal(Object.hasOwn(body.overrides,'album'),false);
+});
