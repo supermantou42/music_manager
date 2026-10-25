@@ -56,3 +56,5 @@ Go 构建输出 `metadata-bridge/metadata-bridge.exe`，已被 Git 忽略。更�
 `npm run dev` 提供浏览器备用模式；原生 mpv、服务管理与窗口控制需要 Electron。开发版调试菜单支持重载、开发者工具与重启。
 
 安装包构建、版本标签及 Release 自动化见 [版本与发布](releasing.md)。
+
+导出集成测试会调用 FFmpeg/ffprobe（需包含 libvorbis、libmp3lame 和 PNG 支持）。可执行 `scripts/install-ffmpeg.ps1` 准备固定版本，并将 `tools/ffmpeg/bin` 加入当前终端 PATH。CI 和发布工作流会自动准备该运行库。
