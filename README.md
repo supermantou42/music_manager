@@ -88,3 +88,11 @@ test-fixtures/      本机测试产物（不入库）
 ## 许可与依赖
 
 根项目许可证见 [LICENSE](LICENSE)。`metadata-bridge` 及其依赖包含 AGPL-3.0 组件，见 [桥接程序许可证](metadata-bridge/LICENSE) 与依赖目录中的许可证。第三方声明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。外部运行库不随仓库提交，分发时需保留对应许可声明。
+
+更新内容见 [0.2.0 发布说明](docs/releases/v0.2.0.md)。
+
+## 开源引用与致谢
+
+元信息、歌词和歌曲直链能力复用了 [guohuiyuan/music-lib v1.1.1](https://github.com/guohuiyuan/music-lib/tree/v1.1.1) 的供应商实现（AGPL-3.0），通过独立 Go 桥接程序调用；流程参考了 [guohuiyuan/go-music-dl](https://github.com/guohuiyuan/go-music-dl)。供应商实现并非本项目原创，固定版本源码和原许可证保留在 `metadata-bridge/vendor/` 并随包提供。
+
+另外使用 Electron、mpv、FFmpeg/ffprobe 和 Lucide 等开源组件。完整版本、用途、引用范围和许可证见 [第三方声明](THIRD_PARTY_NOTICES.md) 与 [运行库声明](build/runtime-notices.md)。

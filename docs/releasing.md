@@ -11,7 +11,7 @@
 | 不兼容变更 | `npm version major -m "chore: release v%s"` |
 | 指定测试版本 | `npm version 0.2.0-beta.1 -m "chore: release v%s"` |
 
-执行前整理功能提交、确认工作区干净。版本更新会先运行测试，再创建提交和 `v版本号` 标签，不自动推送。
+执行前整理功能提交，编写 `docs/releases/v版本号.md` 发布说明，并确认工作区干净。版本更新会先运行测试，再创建提交和 `v版本号` 标签，不自动推送。
 
 ## 发布到 GitHub
 
@@ -24,6 +24,8 @@ git push origin v0.1.1
 ```
 
 普通 main 推送和 PR 运行测试；`v*` 标签触发 Windows Release：校验版本、测试、编译桥接程序、准备运行库、打包、启动检查、生成 SHA256 并上传 Release。带 `-beta.1` 等后缀的版本标记为预发布。
+
+Release 正文使用对应的 `docs/releases/v版本号.md`，缺少说明时构建会停止。
 
 发布凭据使用 Actions 自带 `GITHUB_TOKEN`，无需个人令牌。构建任务只读仓库，独立发布任务具有 `contents: write`。已存在的 Release 不覆盖；标签与锁文件不一致时停止。
 
