@@ -9,7 +9,7 @@ test('original lyric fallback survives failed ASR, enforces strict duration and 
  {id:'best',source:'qq',duration:200.9,score:.8,lyrics:'[00:20.00]这是完全相同的歌词正文内容！'}]}};
  t.metadataResult=classifySearch(t,t.metadataResult);
  assert.equal(t.metadataResult.recommendedId,'qq:best');assert.equal(t.metadataResult.searchStatus,'suitable');
- assert.equal(t.metadataResult.candidates[0].assessment.fallback,true);assert.equal(resolveExport(t).candidate.id,'best');
+ assert.equal(t.metadataResult.candidates.find(c=>c.id==='best').assessment.fallback,true);assert.equal(t.metadataResult.candidates.find(c=>c.id==='low').assessment.fallback,true);assert.deepEqual(t.metadataResult.candidates.map(c=>c.id),['best','low','wrong','boundary']);assert.equal(resolveExport(t).candidate.id,'best');
  t.metadataMatch={id:'wrong',source:'qq'};assert.equal(resolveExport(t).candidate.id,'wrong');
  t.candidateExportMode='original';assert.equal(resolveExport(t).origin,'original');
  const {matchesOriginal}=require('../src/fallback-match.cjs');assert.equal(matchesOriginal(t,{duration:201,lyrics}),false);assert.equal(matchesOriginal(t,{duration:0,lyrics}),false);assert.equal(matchesOriginal({...t,lyrics:''},{duration:200,lyrics:''}),false);
@@ -21,3 +21,10 @@ test('missing candidates preserve original data and invalid export modes are rej
 
 test('manual overrides are the final layer across candidate changes and original mode, including explicit empty values',()=>{const {saveOverrides}=require('../src/export-metadata.cjs'),t=sample();saveOverrides(t,{title:'最终手写歌名',lyrics:'',composer:'作曲者'});let out=resolveExport(t);assert.equal(out.track.title,'最终手写歌名');assert.equal(out.track.lyrics,'');assert.equal(out.overrides.composer,'作曲者');t.metadataMatch={id:'manual',source:'qq'};assert.equal(resolveExport(t).track.title,'最终手写歌名');setCandidateMode([t],['a'],'original');assert.equal(resolveExport(t).track.title,'最终手写歌名');assert.equal(t.title,'原歌名');saveOverrides(t,{});assert.equal(resolveExport(t).track.title,'原歌名')});
 test('override validation canonicalizes tag names and blocks operational or technical fields',()=>{const {validateOverrides}=require('../src/export-metadata.cjs');assert.deepEqual(validateOverrides({TITLE:'custom',albumArtist:'artist'}),{title:'custom',album_artist:'artist'});assert.throws(()=>validateOverrides({path:'elsewhere'}));assert.throws(()=>validateOverrides({bitrate:'320000'}));assert.throws(()=>validateOverrides({title:'one',TITLE:'two'}));assert.throws(()=>validateOverrides({genre:123}))});
+
+test('fallback group stays first and chooses the highest score among equal-duration matches',()=>{
+ const {classifySearch}=require('../src/overview.cjs'),lyrics='这是一段完全一致的原始歌词正文';
+ const track={duration:200,lyrics,status:'核验失败',asrStatus:'error'};
+ const candidates=[{id:'low',source:'qq',duration:200,score:.8,lyrics},{id:'other',source:'qq',duration:200,score:1,lyrics:'这是一段不同的歌词正文内容'},{id:'high',source:'netease',duration:200,score:.94,lyrics},{id:'middle',source:'qq',duration:200,score:.9,lyrics}];
+ track.metadataResult=classifySearch(track,{candidates});assert.deepEqual(track.metadataResult.candidates.map(c=>c.id),['high','middle','low','other']);assert.equal(track.metadataResult.recommendedId,'netease:high');assert.equal(resolveExport(track).candidate.id,'high');
+});
