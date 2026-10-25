@@ -59,3 +59,17 @@ test('downloaded audio can join the processing library and is selected for expor
  d.getElementById('openOnlineMusic').click();await wait();d.getElementById('onlineDownloadsTab').click();const add=[...d.querySelectorAll('.online-download-actions button')].find(b=>b.textContent==='加入处理列表');assert(add);add.click();await wait();
  assert(requests.some(r=>r.url==='/api/music/import'));assert.equal(w.eval("checked.has('download:done')"),true);assert.match(d.getElementById('onlineDownloads').textContent,/已加入处理列表/);assert.equal(w.eval('tracks.length'),1);
 });
+
+test('result-derived facets deduplicate singers, expose populated ranges and sort from headers',async t=>{
+ const {w,d,requests}=await workspace(t);const original=w.fetch;
+ const songs=[{key:'a',id:'a',title:'A',artist:'Beta',source:'qq',duration:180,bitrate:320},{key:'b',id:'b',title:'B',artist:'Alpha',source:'netease',duration:240,bitrate:128},{key:'c',id:'c',title:'C',artist:'Alpha',source:'qq',duration:300,bitrate:256},{key:'u',id:'u',title:'U',artist:'Unknown',source:'qq',duration:0,bitrate:0}];
+ w.fetch=async(url,options)=>url==='/api/music/search'?{ok:true,json:async()=>({songs,groups:[]})}:original(url,options);
+ d.getElementById('openOnlineMusic').click();await wait();d.getElementById('onlineQuery').value='test';d.getElementById('onlineSearchForm').dispatchEvent(new w.Event('submit',{cancelable:true}));await wait();
+ const set=(id,value)=>{const n=d.getElementById(id);n.value=value;n.dispatchEvent(new w.Event('change'))};const keys=()=>[...d.querySelectorAll('#onlineResults [data-download-key]')].map(n=>n.dataset.downloadKey);const sort=key=>d.querySelector('[data-online-sort="'+key+'"]').click();
+ assert.equal(d.querySelectorAll('#onlineArtistFilter option').length,4);assert.match(d.getElementById('onlineArtistFilter').textContent,/Alpha（2）/);assert.deepEqual([...d.querySelectorAll('#onlineDurationFilter option')].map(n=>n.value),['','3','4','5','unknown']);assert.deepEqual([...d.querySelectorAll('#onlineBitrateFilter option')].map(n=>n.value),['','128','256','320','unknown']);
+ sort('bitrate');assert.deepEqual(keys(),['b','c','a','u']);sort('bitrate');assert.deepEqual(keys(),['a','c','b','u']);assert.equal(d.querySelector('th[aria-sort="descending"] button').dataset.onlineSort,'bitrate');sort('bitrate');assert.deepEqual(keys(),['a','b','c','u']);
+ sort('artist');assert.deepEqual(keys().slice(0,2),['b','c']);d.querySelector('#onlineResults thead input').click();set('onlineArtistFilter','alpha');set('onlineSourceFilter','qq');set('onlineDurationFilter','5');set('onlineBitrateFilter','256');assert.deepEqual(keys(),['c']);assert.match(d.getElementById('onlineCount').textContent,/3 首隐藏/);
+ d.getElementById('onlineDownloadSelected').click();await wait();assert.deepEqual(requests.filter(r=>r.url==='/api/music/download').map(r=>JSON.parse(r.options.body).key),['c']);
+ d.getElementById('onlineResultsTab').click();d.getElementById('onlineClearFilters').click();assert.equal(keys().length,4);set('onlineDurationFilter','unknown');assert.deepEqual(keys(),['u']);d.getElementById('onlineClearFilters').click();set('onlineBitrateFilter','unknown');assert.deepEqual(keys(),['u']);
+ const prefs=JSON.parse(w.eval('JSON.stringify(captureWorkspace().onlineMusic.filters)'));assert.equal(prefs.onlineBitrateFilter,'unknown');assert.equal(prefs.sortKey,'artist');
+});
