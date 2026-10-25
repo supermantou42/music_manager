@@ -89,7 +89,7 @@ test-fixtures/      本机测试产物（不入库）
 
 根项目许可证见 [LICENSE](LICENSE)。`metadata-bridge` 及其依赖包含 AGPL-3.0 组件，见 [桥接程序许可证](metadata-bridge/LICENSE) 与依赖目录中的许可证。第三方声明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。外部运行库不随仓库提交，分发时需保留对应许可声明。
 
-更新内容见 [0.2.0 发布说明](docs/releases/v0.2.0.md)。
+更新内容见 [0.2.1 发布说明](docs/releases/v0.2.1.md)。
 
 ## 开源引用与致谢
 
