@@ -20,7 +20,7 @@ test('recycle failure aborts export without falling back to deletion',async t=>{
 
 test('custom flat and layered naming is shared with preview and confirmation scope',async t=>{
  const {tracks,service,output}=await setup(t);const layout={directories:[],filename:'{artist} - {title} [{format}]'};const preview=service.preview({ids:['1'],layout,mode:'separate'},tracks);assert.equal(preview.levels,0);assert.equal(preview.examples[0].path,'Artist - Song [mp3].mp3');assert.equal(preview.examples[0].lrc,'Artist - Song [mp3].lrc');
- const result=await service.execute({ids:['1'],output,layout,mode:'separate'},tracks);assert.equal(path.dirname(result[0].path),output);assert.equal(path.basename(result[0].path),'Artist - Song [mp3].mp3');
+ const result=await service.execute({ids:['1'],output,layout,mode:'separate'},tracks);assert.equal(await fs.realpath(path.dirname(result[0].path)),await fs.realpath(output));assert.equal(path.basename(result[0].path),'Artist - Song [mp3].mp3');
  const plan=await service.plan({ids:['1'],output,layout,clear:true},tracks);await assert.rejects(service.execute({ids:['1'],output,layout:{directories:['{artist}'],filename:'{title}'},clear:true,confirmationToken:plan.confirmationToken},tracks),/变化/);
  const tools=require('../ui/export-layout.js');assert.throws(()=>tools.validate({directories:['../outside'],filename:'{title}'}));assert.throws(()=>tools.validate({directories:[],filename:'{unknown}'}));assert.throws(()=>tools.validate({directories:Array(6).fill('{artist}'),filename:'{title}'}));assert.equal(tools.parts({...tracks[0],title:'CON'},layout).filename,'Artist - CON [mp3]');assert.equal(tools.parts({...tracks[0],title:'CON'},{directories:[],filename:'{title}'}).filename,'_CON');
 });
