@@ -67,3 +67,14 @@ test('advanced final output overrides combine field labels and offer deduplicate
  const input=d.querySelector('#overrideFields input[aria-label="歌手"]'),row=input.closest('.override-row');assert.equal(row.querySelector('[aria-label="覆盖字段名"]').hidden,true);assert.match(row.querySelector('label').textContent,/歌手artist/);const choices=row.querySelector('select');assert.equal(choices.options.length,2);assert.match(choices.options[1].textContent,/qq.*netease/);choices.value='0';choices.dispatchEvent(new w.Event('change'));assert.equal(input.value,'New Artist');assert(row.classList.contains('override-changed'));
  const lyrics=d.querySelector('#overrideFields textarea').closest('.override-row').querySelector('select');assert(lyrics);lyrics.value='0';lyrics.dispatchEvent(new w.Event('change'));d.getElementById('saveOverrides').click();await wait();const body=JSON.parse(requests.find(r=>r.url==='/api/manual-overrides').options.body);assert.equal(body.overrides.artist,'New Artist');assert.equal(body.overrides.lyrics,'[00:01]candidate lyric text');assert.equal(Object.hasOwn(body.overrides,'album'),false);
 });
+
+test('replaying an ended browser song seeks to zero before starting',async t=>{
+ const {w,d}=await workspace(t),audio=d.getElementById('audioPlayer');let ended=false,paused=true;
+ Object.defineProperty(audio,'ended',{get:()=>ended,configurable:true});Object.defineProperty(audio,'paused',{get:()=>paused,configurable:true});audio.play=async()=>{paused=false};audio.pause=()=>{paused=true};
+ await w.eval("playTrack(tracks[0],null,null,false)");ended=true;paused=true;audio.currentTime=180;await w.eval("togglePlaybackPause('mpvPause')");assert.equal(audio.currentTime,0);assert.equal(paused,false);
+});
+
+test('candidate offset slider describes when lyrics appear',async t=>{
+ const {w,d}=await workspace(t);w.eval("selectedId='offset';selected={id:'offset',title:'Song',artist:'Artist',lyrics:'original',metadataResult:{candidates:[{id:'c',source:'qq',title:'Song',artist:'Artist',duration:180,score:1,lyrics:'[00:10.00]some candidate lyrics'}]}};renderCandidates(selected)");
+ const slider=d.querySelector('.candidate-offset input');assert.equal(slider.closest('details').open,false);assert.equal(slider.type,'range');assert.equal(slider.step,'0.05');slider.value='-1.5';slider.dispatchEvent(new w.Event('input'));assert.match(d.querySelector('.candidate-offset output').textContent,/歌词提前 1.50 秒/);slider.value='1';slider.dispatchEvent(new w.Event('input'));assert.match(d.querySelector('.candidate-offset output').textContent,/歌词延后 1.00 秒/);slider.dispatchEvent(new w.Event('change'));assert.equal(slider.min,'-1');assert.equal(slider.max,'3');d.querySelector('[aria-label="歌词延后 0.05 秒"]').click();assert.match(d.querySelector('.candidate-offset output').textContent,/1.05 秒/);
+});
