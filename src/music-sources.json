@@ -1,0 +1,14 @@
+[
+  {"id":"netease","name":"网易云音乐","default":true,"hosts":["music.126.net","music.163.com","music126.net"]},
+  {"id":"qq","name":"QQ 音乐","default":true,"hosts":["qq.com","qqmusic.qq.com","gtimg.com","gtimg.cn"]},
+  {"id":"kugou","name":"酷狗音乐","default":true,"hosts":["kugou.com","kugou.net"]},
+  {"id":"kuwo","name":"酷我音乐","default":true,"hosts":["kuwo.cn","kuwo.com"]},
+  {"id":"migu","name":"咪咕音乐","hosts":["migu.cn","miguvideo.com","cmvideo.cn"]},
+  {"id":"qianqian","name":"千千音乐","hosts":["qianqian.com","taihe.com","baidu.com","bdstatic.com"]},
+  {"id":"soda","name":"汽水音乐","note":"仅支持未加密的直链；试听会单独标记","hosts":["douyinvod.com","bytecdn.cn","bytecdn.com","pstatp.com","snssdk.com","byteimg.com","muscdn.com","ibytedtos.com"]},
+  {"id":"fivesing","name":"5sing","hosts":["5sing.com","5sing.kugou.com","kugou.com","5sing.cn"]},
+  {"id":"jamendo","name":"Jamendo","hosts":["jamendo.com","jamendo.net","newjamendo.com"]},
+  {"id":"joox","name":"JOOX","hosts":["joox.com","qq.com","gtimg.com"]},
+  {"id":"bilibili","name":"Bilibili","hosts":["bilivideo.com","bilivideo.cn","bilibili.com","akamaized.net"]},
+  {"id":"apple","name":"Apple Music","preview":true,"note":"仅提供试听片段","hosts":["mzstatic.com","apple.com"]}
+]

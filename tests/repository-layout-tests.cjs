@@ -34,11 +34,18 @@ test('HTTP entry serves frontend assets and package version after source relocat
   const response=await fetch(base),html=await response.text();
   assert.equal(response.status,200);
   assert.ok(!html.includes('__TOKEN__'));
-  for(const name of ['app.js','desktop.js','metadata-editor.js','appearance.js','lyrics.js','comparison.js','library.js','style.css','desktop.css','icons.svg']){
+  for(const name of ['app.js','desktop.js','metadata-editor.js','appearance.js','lyrics.js','comparison.js','library.js','style.css','desktop.css','online-music.js','online-music.css','icons.svg']){
     const asset=await fetch(`${base}/${name}`);
     assert.equal(asset.status,200,name);
     assert.ok((await asset.text()).length>0,name);
   }
   assert.equal((await (await fetch(base+'/api/app-info')).json()).version,require('../package.json').version);
+  const sources=await (await fetch(base+'/api/music/sources')).json();
+  assert.equal(sources.length,12);assert(sources.some(source=>source.id==='apple'&&source.preview));
+  const denied=await fetch(base+'/api/music/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'test',sources:['invalid-source']})});
+  assert.equal(denied.status,400);assert.match((await denied.json()).error,/无效请求/);
+  const token=html.match(/name="app-token" content="([^"]+)"/)[1];
+  const invented=await fetch(base+'/api/music/download',{method:'POST',headers:{'Content-Type':'application/json','X-App-Token':token},body:JSON.stringify({key:'invented',output:dir})});
+  assert.equal(invented.status,400);assert.match((await invented.json()).error,/过期/);
   assert.deepEqual(await fs.readFile(path.join(dir,'library.json')),before,'loading must preserve the existing library');
 });

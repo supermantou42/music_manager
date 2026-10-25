@@ -1,7 +1,7 @@
 module music-manager/metadata-bridge
 
-go 1.20
+go 1.25.0
 
-require github.com/guohuiyuan/music-lib v1.1.1-0.20260916154859-28e1080ba416
+require github.com/guohuiyuan/music-lib v1.1.1
 
-replace golang.org/x/text => golang.org/x/text v0.14.0
+require golang.org/x/text v0.39.0 // indirect

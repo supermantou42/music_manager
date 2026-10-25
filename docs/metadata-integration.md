@@ -6,9 +6,9 @@
 
 参考项目：[guohuiyuan/go-music-dl](https://github.com/guohuiyuan/go-music-dl)。
 
-实际复用其供应商库 [guohuiyuan/music-lib](https://github.com/guohuiyuan/music-lib)，固定版本 `v1.1.1-0.20260916154859-28e1080ba416`。源码在 `metadata-bridge/vendor/`，包含歌词获取与 QRC 解码。
+实际复用其供应商库 [guohuiyuan/music-lib](https://github.com/guohuiyuan/music-lib)，固定版本 `v1.1.1`（提交 `6353508e84cd357b5bc3acf32d95a16e01bbe20c`）。源码在 `metadata-bridge/vendor/`，包含歌词获取与 QRC 解码。
 
-桥接程序仅暴露元信息搜索与歌词操作，没有音频下载入口。它使用 AGPL-3.0 组件，许可证见 [metadata-bridge/LICENSE](../metadata-bridge/LICENSE)。
+桥接程序提供元信息搜索、歌词与多源歌曲目录、音频直链解析；下载由 Node 服务管理，见 [在线搜歌与下载](online-music.md)。它使用 AGPL-3.0 组件，许可证见 [metadata-bridge/LICENSE](../metadata-bridge/LICENSE)。
 
 ## 调用链
 
@@ -39,4 +39,4 @@ npm run build:metadata
 node --test tests/tests.cjs tests/metadata-tests.cjs
 ```
 
-需要 Go 1.20+，输出位于 `metadata-bridge/metadata-bridge.exe`。可选 Cookie 通过 `MUSIC_NETEASE_COOKIE` / `MUSIC_QQ_COOKIE` 环境变量传入，不保存在仓库。搜索发送歌名、歌手；不上传音频、路径或 ASR 转写。
+需要 Go 1.25+，输出位于 `metadata-bridge/metadata-bridge.exe`。可选 Cookie 通过 `MUSIC_NETEASE_COOKIE` / `MUSIC_QQ_COOKIE` 环境变量传入，不保存在仓库。搜索发送歌名、歌手；不上传音频、路径或 ASR 转写。

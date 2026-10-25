@@ -1,8 +1,25 @@
-# github.com/guohuiyuan/music-lib v1.1.1-0.20260916154859-28e1080ba416
-## explicit; go 1.18
+# github.com/guohuiyuan/music-lib v1.1.1
+## explicit; go 1.25.0
+github.com/guohuiyuan/music-lib/apple
+github.com/guohuiyuan/music-lib/bilibili
+github.com/guohuiyuan/music-lib/fivesing
+github.com/guohuiyuan/music-lib/jamendo
+github.com/guohuiyuan/music-lib/joox
+github.com/guohuiyuan/music-lib/kugou
+github.com/guohuiyuan/music-lib/kuwo
 github.com/guohuiyuan/music-lib/lyrics
+github.com/guohuiyuan/music-lib/migu
 github.com/guohuiyuan/music-lib/model
 github.com/guohuiyuan/music-lib/netease
+github.com/guohuiyuan/music-lib/provider
+github.com/guohuiyuan/music-lib/qianqian
 github.com/guohuiyuan/music-lib/qq
+github.com/guohuiyuan/music-lib/soda
 github.com/guohuiyuan/music-lib/utils
-# golang.org/x/text => golang.org/x/text v0.14.0
+# golang.org/x/text v0.39.0
+## explicit; go 1.25.0
+golang.org/x/text/encoding
+golang.org/x/text/encoding/internal
+golang.org/x/text/encoding/internal/identifier
+golang.org/x/text/encoding/simplifiedchinese
+golang.org/x/text/transform

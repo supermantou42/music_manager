@@ -8,6 +8,7 @@
 | --- | --- |
 | `src/electron.cjs`、`src/preload.cjs` | Electron 窗口、受限 IPC 与界面桥接 |
 | `src/server.cjs` | HTTP API、扫描、任务与导出编排 |
+| `src/music-downloads.cjs`、`src/music-sources.json` | 多源歌曲搜索、下载队列与源配置 |
 | `src/*` | ASR、元信息、评分、播放、波形与持久化模块 |
 | `ui/` | 浏览器端脚本、样式、HTML 与本地 SVG 图标 |
 | `metadata-bridge/` | 独立 Go 适配程序，stdin/stdout JSON 通信 |
@@ -21,7 +22,7 @@
 
 ## 测试与构建
 
-开发环境：Node.js 24。
+开发环境：Node.js 24、Go 1.25+。
 
 ```powershell
 npm ci

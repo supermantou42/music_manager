@@ -1,2 +1,4 @@
-github.com/guohuiyuan/music-lib v1.1.1-0.20260916154859-28e1080ba416 h1:k+po7yvWzcwt+4UmH/0xnZWNO5onmcWkP6fN/Dmkwtg=
-github.com/guohuiyuan/music-lib v1.1.1-0.20260916154859-28e1080ba416/go.mod h1:3NMmYFjK/xfh3+vFR6c+BetrxUrIts3zwTrlnbRyjU4=
+github.com/guohuiyuan/music-lib v1.1.1 h1:ju6aotmLvhHB26j/7dVUwmurf5jWMRkUq+MoqC3lzlw=
+github.com/guohuiyuan/music-lib v1.1.1/go.mod h1:hWXbpQZoeb9wVW0Q60iC41f6lOECq8Vr6FdU+QpK2Xw=
+golang.org/x/text v0.39.0 h1:UbZz4pLOvn600D6Oh6GGEI6VAmndrEBLv8/6BEXzyus=
+golang.org/x/text v0.39.0/go.mod h1:3UwRclnC2g0TU9x8PZiyfOajCd1zaUNHF9cvqcQZ+ZM=

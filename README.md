@@ -2,9 +2,11 @@
 
 Windows 本地音乐库整理工具：扫描音乐与标签，使用本地 ASR 辅助核验歌词，搜索替代元信息，试听对比后整理导出。
 
-当前处于原型验证阶段，版本见 [Releases](https://github.com/supermantou42/music_manager/releases)。基于 Electron，桌面试听使用 mpv，语音识别使用本地 Qwen3-ASR，在线搜索接入网易云音乐与 QQ 音乐。
+当前处于原型验证阶段，版本见 [Releases](https://github.com/supermantou42/music_manager/releases)。基于 Electron，桌面试听使用 mpv，语音识别使用本地 Qwen3-ASR，元信息核验接入网易云音乐与 QQ 音乐，独立搜歌下载支持 12 个音乐源。
 
 ## 主要功能
+
+- **在线搜歌与下载**：多源搜索、单首或批量下载、进度、取消与重试，下载后直接试听。
 
 - **音乐库概览**：全目录扫描、封面和音频参数、筛选排序、跨列表全选及位置恢复。
 - **歌词核验**：声学粗切分、本地转写、时间戳与左右差异对比、双语评分和异常重试。
@@ -14,7 +16,7 @@ Windows 本地音乐库整理工具：扫描音乐与标签，使用本地 ASR �
 
 ## 快速开始
 
-需要 Windows、Node.js 24+/npm，以及可在终端运行的 `ffmpeg`、`ffprobe`。编译元信息桥接程序需要 Go 1.20+；安装 mpv 的脚本需要 curl 和 7-Zip。
+需要 Windows、Node.js 24+/npm，以及可在终端运行的 `ffmpeg`、`ffprobe`。编译元信息桥接程序需要 Go 1.25+；安装 mpv 的脚本需要 curl 和 7-Zip。
 
 在项目根目录执行：
 
@@ -76,6 +78,7 @@ test-fixtures/      本机测试产物（不入库）
 ## 文档导航
 
 - [使用说明与匹配规则](docs/usage.md)
+- [在线搜歌与下载](docs/online-music.md)
 - [ASR 模型、GPU 服务与并发](docs/asr.md)
 - [开发、测试与目录约定](docs/development.md)
 - [版本与发布](docs/releasing.md)

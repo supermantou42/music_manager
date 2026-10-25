@@ -1,4 +1,4 @@
-// Metadata-only adapter to guohuiyuan/music-lib. No audio download endpoints.
+// Metadata and direct-audio catalog adapter to guohuiyuan/music-lib.
 package main
 
 import (
@@ -20,6 +20,9 @@ type Request struct {
 }
 
 func execute(r Request) (interface{}, error) {
+	if strings.HasPrefix(r.Action, "catalog-") {
+		return catalogRequest(r)
+	}
 	switch r.Source {
 	case "netease":
 		client := netease.New(os.Getenv("MUSIC_NETEASE_COOKIE"))
