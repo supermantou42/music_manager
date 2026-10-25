@@ -21,7 +21,7 @@ async function workspace(t){
     if(url==='/api/music/cancel'){const body=JSON.parse(options.body);jobs.find(j=>j.id===body.id).status='cancelled';data={}}
     return {ok:true,json:async()=>data};
   };
-  for(const name of ['lyrics.js','comparison.js','library.js','app.js','desktop.js','metadata-editor.js','appearance.js','online-music.js']){const s=d.createElement('script');s.textContent=fs.readFileSync(path.join(__dirname,'../ui',name),'utf8');d.body.append(s)}
+  for(const name of ['lyrics.js','comparison.js','library.js','app.js','desktop.js','metadata-editor.js','appearance.js','online-music.js','export-layout.js','export-dialog.js']){const s=d.createElement('script');s.textContent=fs.readFileSync(path.join(__dirname,'../ui',name),'utf8');d.body.append(s)}
   await wait();return {w,d,requests,jobs};
 }
 test('online music opens a bounded dialog with twelve sources and restores the library on Escape',async t=>{

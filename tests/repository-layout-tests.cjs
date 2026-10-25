@@ -34,7 +34,7 @@ test('HTTP entry serves frontend assets and package version after source relocat
   const response=await fetch(base),html=await response.text();
   assert.equal(response.status,200);
   assert.ok(!html.includes('__TOKEN__'));
-  for(const name of ['app.js','desktop.js','metadata-editor.js','appearance.js','lyrics.js','comparison.js','library.js','style.css','desktop.css','online-music.js','online-music.css','icons.svg']){
+  for(const name of ['app.js','desktop.js','metadata-editor.js','appearance.js','lyrics.js','comparison.js','library.js','style.css','desktop.css','online-music.js','online-music.css','export-layout.js','export-dialog.js','icons.svg']){
     const asset=await fetch(`${base}/${name}`);
     assert.equal(asset.status,200,name);
     assert.ok((await asset.text()).length>0,name);
