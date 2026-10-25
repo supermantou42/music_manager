@@ -59,6 +59,12 @@ func catalogRequest(r Request) (interface{}, error) {
 		return nil, err
 	}
 	switch r.Action {
+ case "catalog-lyrics":
+  if strings.TrimSpace(r.Song.ID)=="" { return nil, fmt.Errorf("missing song id") }
+  r.Song.Source=r.Source
+  text, err := client.GetLyrics(&r.Song)
+  return map[string]string{"lyrics":text},err
+
 	case "catalog-search":
 		query := strings.TrimSpace(r.Query)
 		if query == "" || len([]rune(query)) > 200 {

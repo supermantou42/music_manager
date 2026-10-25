@@ -126,6 +126,9 @@ function createDownloadService(options={}){
       j.status='checking';const info=await inspect(temporary);signal.throwIfAborted();
       if(!['mp3','flac','m4a','ogg','opus','wav','aac','ape','wma'].includes(info.ext)||!(info.duration>0))throw Error('返回的音频信息无效');
       if(entry.song.duration>0&&info.duration<entry.song.duration*.85&&entry.song.duration-info.duration>10)j.preview=true;
+j.lyrics='';j.lyricStatus='该源不提供歌词';
+      if(definitions.find(s=>s.id===j.source)?.lyrics){try{const result=await providers.run(()=>bridge({action:'catalog-lyrics',source:j.source,song:entry.song},25000,{signal}));j.lyrics=String(result.lyrics||'');j.lyricStatus=j.lyrics.trim()?'已获取':'未返回歌词'}catch(error){j.lyricStatus='获取失败';j.lyricError=message(error)}}
+      signal.throwIfAborted();
       const stem=clean(j.artist)+' - '+clean(j.title)+(j.preview?' [试听]':'');
       let destination;
       for(let index=0;index<10000;index++){
@@ -133,7 +136,7 @@ function createDownloadService(options={}){
         try{await fs.copyFile(temporary,destination,nativeFS.constants.COPYFILE_EXCL);break}catch(error){if(error.code!=='EEXIST')throw error;if(index===9999)throw Error('同名文件过多')}
       }
       if(signal.aborted){await fs.unlink(destination);signal.throwIfAborted()}
-      j.path=destination;j.audioInfo=info;j.status='completed';j.finishedAt=new Date().toISOString();j.track={id:'download:'+j.id,title:j.title,artist:j.artist,album:j.album,path:destination,duration:info.duration,lyrics:'',cover:j.cover,coverIndex:null};
+      j.path=destination;j.audioInfo=info;      j.status='completed';j.finishedAt=new Date().toISOString();j.track={id:'download:'+j.id,title:j.title,artist:j.artist,album:j.album,path:destination,duration:info.duration,lyrics:'',cover:j.cover,coverIndex:null};
     }catch(error){const timeout=signal.reason?.name==='TimeoutError';j.status=signal.aborted&&!timeout?'cancelled':'failed';j.error=timeout?'下载超时，请重试':signal.aborted?'下载已取消':(error.cause?.code?'网络错误（'+error.cause.code+'）：':'')+message(error);j.finishedAt=new Date().toISOString()}
     finally{if(temporary)await fs.unlink(temporary).catch(()=>{});controllers.delete(j.id);await persist().catch(()=>{})}
   }

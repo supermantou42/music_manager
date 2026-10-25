@@ -50,7 +50,7 @@ test('HTML and incomplete HTTP ranges are rejected without leaving partial files
 });
 test('download queue is bounded to two transfers and cancellation cleans active and queued work',async t=>{
   let active=0,maximum=0,resolved=0;const {service,output}=await fixture(t,{
-    bridge:async request=>{if(request.action==='catalog-search')return [song];resolved++;return {url:'https://audio.qq.com/song.mp3'}},
+    bridge:async request=>{if(request.action==='catalog-search')return [song];if(request.action==='catalog-lyrics')return {lyrics:''};resolved++;return {url:'https://audio.qq.com/song.mp3'}},
     fetch:async()=>{active++;maximum=Math.max(maximum,active);let timer;return new Response(new ReadableStream({start(controller){timer=setTimeout(()=>{controller.enqueue(new Uint8Array([1,2,3]));controller.close();active--},100)},cancel(){clearTimeout(timer);active--}}))},
   });
   const found=await service.search('Song',['qq']);const queued=[];for(let i=0;i<4;i++)queued.push(await service.enqueue(found.songs[0].key,output));
@@ -80,4 +80,9 @@ test('audition rejects untrusted redirects before fetching the destination',asyn
 
 test('downloads default to an app-owned temporary directory',async t=>{
  const {service,root}=await fixture(t);const result=await service.search('Song',['qq']);await service.enqueue(result.songs[0].key);await service.settled();const [job]=await service.list();assert.equal(job.status,'completed');assert.equal(job.output,path.join(root,'download-cache'));assert.equal(path.dirname(job.path),service.temporaryDirectory);
+});
+
+test('download retains same-source lyrics and lyric failures do not discard audio',async t=>{
+ let fail=false;const {service,output}=await fixture(t,{bridge:async request=>request.action==='catalog-search'?[song]:request.action==='catalog-lyrics'?fail?Promise.reject(Error('lyric timeout')):{lyrics:'[00:10.00]downloaded original lyrics'}:{url:'https://audio.qq.com/test.mp3'}});
+ const result=await service.search('Song',['qq']);await service.enqueue(result.songs[0].key,output);await service.settled();assert.equal((await service.list())[0].lyrics,'[00:10.00]downloaded original lyrics');fail=true;await service.enqueue(result.songs[0].key,output);await service.settled();const [job]=await service.list();assert.equal(job.status,'completed');assert.equal(job.lyricStatus,'获取失败');assert.match(job.lyricError,/timeout/);await fs.access(job.path);
 });

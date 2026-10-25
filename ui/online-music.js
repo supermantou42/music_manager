@@ -79,7 +79,7 @@
     for(const job of jobs){
       const row=element('article',undefined,'online-download-row'),info=element('div',undefined,'online-download-info');info.append(element('strong',job.title+' · '+job.artist),element('small',sourceName(job.source)+' · '+(states[job.status]||job.status)+(job.preview?' · 试听片段':'')));
       const progress=element('progress');progress.max=job.totalBytes||1;if(job.totalBytes)progress.value=Math.min(job.receivedBytes,job.totalBytes);else if(!activeStates.has(job.status))progress.value=job.status==='completed'?1:0;progress.setAttribute('aria-label',job.title+'下载进度');info.append(progress,element('small',job.totalBytes?bytes(job.receivedBytes)+' / '+bytes(job.totalBytes):bytes(job.receivedBytes||0)));
-      if(job.audioInfo)info.append(element('small',job.audioInfo.ext.toUpperCase()+' · '+duration(job.audioInfo.duration)+' · '+(job.audioInfo.bitrate||'—')+' kbps'));
+      if(job.lyricStatus)info.append(element('small','歌词：'+job.lyricStatus+(job.lyricError?' · '+job.lyricError:'')));if(job.audioInfo)info.append(element('small',job.audioInfo.ext.toUpperCase()+' · '+duration(job.audioInfo.duration)+' · '+(job.audioInfo.bitrate||'—')+' kbps'));
       if(job.path){const location=element('small',job.path,'online-download-path');location.title=job.path;info.append(location)}if(job.error)info.append(element('small',job.error,'online-error'));
       const controls=element('div',undefined,'online-download-actions');
       if(activeStates.has(job.status)){const cancel=element('button','取消');cancel.onclick=async()=>{cancel.disabled=true;try{await api('music/cancel',{id:job.id});await poll()}catch(e){notify(e.message);cancel.disabled=false}};controls.append(cancel)}

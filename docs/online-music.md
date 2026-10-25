@@ -46,3 +46,7 @@ node scripts/verify/verify-online-music.cjs --download
 ```
 
 默认搜索 Jamendo、酷我、QQ 和网易云的 `piano`；`--download` 下载一个 Jamendo 结果到本地 `validation/online-music/`。`--all` 查询全部源，`MUSIC_VERIFY_QUERY` 可更改关键词。此验证会联网，不属于 `npm test`。
+
+下载时会尝试获取同源歌词，在下载记录中显示结果；歌词失败不影响音频保存。加入处理列表时，平台元信息、封面地址和取得的歌词作为原信息保留；实际音频参数仍由文件检测。此前下载记录没有保存的歌词不会自动补回。
+
+歌词候选搜索支持网易云、QQ、酷狗、酷我、咪咕、千千、汽水、5sing、JOOX、Apple Music；默认网易云和 QQ，下载歌曲还默认选中其原来源。Jamendo 和 Bilibili 当前适配不提供歌词。各源歌词可用性仍取决于平台接口与账号权益。
