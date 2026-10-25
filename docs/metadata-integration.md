@@ -8,14 +8,14 @@
 
 实际复用其供应商库 [guohuiyuan/music-lib](https://github.com/guohuiyuan/music-lib)，固定版本 `v1.1.1`（提交 `6353508e84cd357b5bc3acf32d95a16e01bbe20c`）。源码在 `metadata-bridge/vendor/`，包含歌词获取与 QRC 解码。
 
-桥接程序提供元信息搜索、歌词与多源歌曲目录、音频直链解析；下载由 Node 服务管理，见 [在线搜歌与下载](online-music.md)。它使用 AGPL-3.0 组件，许可证见 [metadata-bridge/LICENSE](../metadata-bridge/LICENSE)。
+桥接程序提供元信息搜索、歌词与多源歌曲目录、音频直链解析；下载由 Node 服务管理，见 [在线搜歌与下载](online-music.md)。供应商实现并非本项目原创，实际 Go 依赖为 music-lib；go-music-dl 是流程参考，未作为单独模块或程序打包。完整版本和组件声明见 [第三方声明](../THIRD_PARTY_NOTICES.md)。桥接程序使用 AGPL-3.0 组件，许可证见 [metadata-bridge/LICENSE](../metadata-bridge/LICENSE)。
 
 ## 调用链
 
 ```text
 ui/ → src/server.cjs → src/metadata.cjs
                     → metadata-bridge/metadata-bridge.exe
-                    → 网易云 / QQ 元信息与歌词接口
+                    → 所选音乐源的元信息与歌词接口
 ```
 
 Go 程序通过 stdin 接收 JSON，通过 stdout 返回 JSON。QQ 搜索保留无播放权限的元信息结果，避免因 VIP 下载限制遗漏原版歌曲；网易云搜索复用供应商协议加密。两者都不将“纯音乐 / 无歌词”等占位文本当作有效歌词。

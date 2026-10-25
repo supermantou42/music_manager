@@ -1,5 +1,26 @@
 # Third-party notices
 
+## Referenced projects and reused code
+
+| Project | Version / revision | Use in MusicManager | License / source location |
+| --- | --- | --- | --- |
+| [guohuiyuan/music-lib](https://github.com/guohuiyuan/music-lib/tree/v1.1.1) | v1.1.1, `6353508e84cd357b5bc3acf32d95a16e01bbe20c` | Provider implementations for metadata, lyrics, QRC processing and audio URL resolution; called by the Go bridge | AGPL-3.0; complete vendored source and original license at `metadata-bridge/vendor/github.com/guohuiyuan/music-lib/` |
+| [golang.org/x/text](https://cs.opensource.google/go/x/text/+/refs/tags/v0.39.0:) | v0.39.0 | Text encoding support used by the bridge dependency | BSD-3-Clause; source, LICENSE and PATENTS at `metadata-bridge/vendor/golang.org/x/text/` |
+| [guohuiyuan/go-music-dl](https://github.com/guohuiyuan/go-music-dl) | Implementation reference | Reference for the multi-provider search and metadata workflow; the actual linked provider library is music-lib | Reference project, not a separately bundled executable or Go module |
+
+The provider code is **reused through a pinned Go dependency**, not presented as original MusicManager code. The bridge is distributed with its own [AGPL-3.0 license](metadata-bridge/LICENSE), sources and vendored dependencies. This version adds local JSON bridge actions, download/import orchestration, UI and export handling around that library. Upstream license texts and notices are retained in the vendor tree.
+
+The application has its own [LICENSE](LICENSE); bundled components retain their respective licenses. This notice does not replace or relicense their license texts.
+
+## Bundled programs
+
+- [Electron](https://github.com/electron/electron), 44.7.0: desktop runtime, MIT; Electron/Chromium third-party license files accompany the runtime.
+- [mpv](https://github.com/mpv-player/mpv), shinchiro build 20261011 (`accb7b2821`): native audio playback. Distribution: [mpv-winbuild-cmake](https://github.com/shinchiro/mpv-winbuild-cmake/releases/tag/20261011). GPL/LGPL texts and documentation accompany the packaged binary.
+- [FFmpeg / ffprobe](https://github.com/FFmpeg/FFmpeg/commit/38b88335f9), Gyan essentials build 8.1.2: audio inspection and export. This distribution is GPLv3; license and build information accompany the binaries.
+
+See [runtime notices](build/runtime-notices.md) for exact distribution and source references. Installed packages include the runtime notice as `resources/RUNTIME-NOTICES.md`, the bridge source/licenses under `resources/metadata-bridge/`, and the runtime licenses under `resources/tools/`.
+
+
 ## Lucide
 
 Version: 1.59.0
